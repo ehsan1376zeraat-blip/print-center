@@ -8,6 +8,7 @@ jobs:
     runs-on: windows-latest
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app_db
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,13 +18,25 @@ jobs:
         with:
           node-version: 20
 
-      - name: Create .env file
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Create .env for build
         shell: cmd
         run: echo DATABASE_URL=postgresql://postgres:postgres@localhost:5432/app_db> .env
 
-      - name: Run build-setup.bat
-        shell: cmd
-        run: call desktop\build-setup.bat
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Build Setup.exe with electron-builder
+        working-directory: desktop
+        run: npx electron-builder --win nsis --x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Setup.exe
         uses: actions/upload-artifact@v4
