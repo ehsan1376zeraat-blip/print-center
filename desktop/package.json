@@ -1,0 +1,49 @@
+{
+  "name": "chapino-desktop",
+  "productName": "چاپینو",
+  "version": "1.0.0",
+  "description": "نرم‌افزار مدیریت مرکز کپی و چاپ",
+  "author": "Chapino",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "ir.chapino.copycenter",
+    "productName": "چاپینو",
+    "directories": {
+      "output": "dist-setup"
+    },
+    "files": [
+      "main.js",
+      "icon.png"
+    ],
+    "extraResources": [
+      { "from": "../.next", "to": "app/.next" },
+      { "from": "../public", "to": "app/public" },
+      { "from": "../node_modules", "to": "app/node_modules" },
+      { "from": "../package.json", "to": "app/package.json" },
+      { "from": "../.env", "to": "app/.env" }
+    ],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "چاپینو",
+      "artifactName": "Chapino-Setup-${version}.exe",
+      "installerLanguages": ["fa_IR", "en_US"]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+name: Build Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run build-setup.bat
+        shell: cmd
+        run: call desktop\build-setup.bat
+
+      - name: Upload Setup.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chapino-Setup
+          path: desktop/dist-setup/*.exe

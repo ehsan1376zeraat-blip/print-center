@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>قالب فاکتور چاپینو</title>
+  <style>
+    @page{size:A4 portrait;margin:0}*{box-sizing:border-box}body{margin:0;background:#fff;color:#1c2833;font-family:Vazirmatn,Tahoma,sans-serif}.invoice{position:relative;width:210mm;min-height:297mm;padding:12mm 12mm 22mm}.topline{position:absolute;inset:0 0 auto;height:6mm;background:{{PRIMARY_COLOR}}}.head{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:5mm;border-bottom:1px solid #a9dfbf}.brand{display:flex;gap:4mm;align-items:center}.logo{width:16mm;height:16mm;border-radius:4mm;object-fit:cover}.brand h1{margin:0;font-size:18px}.brand p{margin:1mm 0;color:#7f8c8d;font-size:10px}.meta{padding:3mm 4mm;border-radius:3mm;background:#f8f9fa;font-size:10px}.meta b{display:block;color:{{PRIMARY_COLOR}};font-size:15px}.customer{margin:6mm 0;padding:4mm;border-right:1.3mm solid {{PRIMARY_COLOR}};border-radius:2mm;background:#f8f9fa;font-size:11px}.customer b{font-size:13px}table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid #eaecee;border-radius:2mm;font-size:10px}th{height:12mm;padding:2mm;background:{{PRIMARY_COLOR}};color:#fff}td{height:10mm;padding:2mm;border:0;border-bottom:1px solid #eaecee}tbody tr:nth-child(even){background:#f8f9fa}.payment{background:#e8f8f5!important;color:#126c5b}.summary{display:grid;grid-template-columns:1fr 72mm;margin-top:6mm;border:1px solid #a9dfbf;border-radius:3mm;overflow:hidden;background:#f8f9fa}.words,.totals{padding:4mm}.words{font-size:10px;font-style:italic}.totals{background:#fff}.totals div{display:flex;justify-content:space-between;padding:2mm 0;border-bottom:1px dashed #eaecee;font-size:10px}.totals .final{color:#e74c3c;font-size:13px;font-weight:bold}.footer{position:absolute;right:12mm;left:12mm;bottom:7mm;padding:3mm;text-align:center;border-bottom:1mm solid {{PRIMARY_COLOR}};border-radius:2mm 2mm 0 0;background:#f8f9fa;color:#7f8c8d;font-size:9px}
+  </style>
+</head>
+<body>
+  <article class="invoice">
+    <div class="topline"></div>
+    <header class="head">
+      <div class="brand"><img class="logo" src="{{LOGO_SRC}}" alt="لوگو"><div><h1>{{BUSINESS_NAME}}</h1><p>{{BUSINESS_PHONE}}</p><p>{{BUSINESS_ADDRESS}}</p></div></div>
+      <div class="meta">شماره فاکتور<b>{{INVOICE_NUMBER}}</b><span>تاریخ: {{JALALI_DATE}}</span></div>
+    </header>
+    <section class="customer"><span>مشخصات مشتری</span><br><b>{{CUSTOMER_NAME}}</b> — {{CUSTOMER_PHONE}}</section>
+    <table><thead><tr><th>ردیف</th><th>شرح</th><th>تعداد</th><th>واحد</th><th>قیمت واحد</th><th>جمع (تومان)</th></tr></thead><tbody>{{ITEM_ROWS}}</tbody></table>
+    <section class="summary"><div class="words">جمع کل به حروف<br><b>{{TOTAL_IN_WORDS}}</b></div><div class="totals"><div><span>جمع فروش</span><b>{{SUBTOTAL}}</b></div><div><span>واریزی</span><b>{{PAYMENTS}}</b></div><div><span>مانده قبلی</span><b>{{PREVIOUS_BALANCE}}</b></div><div class="final"><span>مانده نهایی</span><b>{{END_BALANCE}}</b></div></div></section>
+    <footer class="footer">شماره کارت: {{CARD_NUMBER}} (به نام {{CARD_OWNER}})<br>{{FOOTER_TEXT}}<br>مدیریت: {{MANAGER}}<br>صفحه ۱ از ۱</footer>
+  </article>
+</body>
+</html>
