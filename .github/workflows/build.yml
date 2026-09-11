@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app_db
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -14,6 +16,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Create .env file
+        shell: cmd
+        run: echo DATABASE_URL=postgresql://postgres:postgres@localhost:5432/app_db> .env
 
       - name: Run build-setup.bat
         shell: cmd
