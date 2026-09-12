@@ -6,9 +6,13 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app_db
       NEXT_TELEMETRY_DISABLED: 1
+      ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
+      CI: true
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,29 +21,55 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install root dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
-      - name: Create .env for build
+      - name: Create .env file
         shell: cmd
-        run: echo DATABASE_URL=postgresql://postgres:postgres@localhost:5432/app_db> .env
+        run: |
+          echo DATABASE_URL=postgresql://postgres:postgres@localhost:5432/app_db> .env
+          echo NEXT_TELEMETRY_DISABLED=1>> .env
 
       - name: Build Next.js app
         run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Show desktop package.json (for debugging)
+        shell: cmd
+        run: type desktop\package.json
 
       - name: Install desktop dependencies
         working-directory: desktop
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build Setup.exe with electron-builder
         working-directory: desktop
-        run: npx electron-builder --win nsis --x64
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: cmd
+        run: |
+          echo "Starting electron-builder..."
+          npx electron-builder --win nsis --x64 --publish never
+          if %errorlevel% neq 0 (
+            echo "ERROR: electron-builder failed with code %errorlevel%"
+            exit /b %errorlevel%
+          )
+          echo "electron-builder completed successfully"
+
+      - name: List output files (for debugging)
+        shell: cmd
+        run: |
+          echo "Contents of desktop/dist-setup:"
+          dir desktop\dist-setup /s /b
+          if not exist desktop\dist-setup\*.exe (
+            echo "ERROR: No .exe file found in dist-setup!"
+            exit /b 1
+          )
 
       - name: Upload Setup.exe
         uses: actions/upload-artifact@v4
         with:
           name: Chapino-Setup
           path: desktop/dist-setup/*.exe
+          retention-days: 30
