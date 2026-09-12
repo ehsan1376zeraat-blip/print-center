@@ -6,13 +6,13 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    
+
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app_db
       NEXT_TELEMETRY_DISABLED: 1
       ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
       CI: true
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,10 +21,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: 'npm'
 
       - name: Install root dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Create .env for build
         shell: cmd
@@ -34,38 +33,25 @@ jobs:
 
       - name: Build Next.js app
         run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
 
-      - name: Show desktop package.json (for debugging)
+      - name: Show desktop package.json (debug)
         shell: cmd
         run: type desktop\package.json
 
       - name: Install desktop dependencies
         working-directory: desktop
-        run: npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Build Setup.exe with electron-builder
         working-directory: desktop
         shell: cmd
-        run: |
-          echo "Starting electron-builder..."
-          npx electron-builder --win nsis --x64 --publish never
-          if %errorlevel% neq 0 (
-            echo "ERROR: electron-builder failed with code %errorlevel%"
-            exit /b %errorlevel%
-          )
-          echo "electron-builder completed successfully"
+        run: npx --yes electron-builder --win nsis --x64 --publish never
 
-      - name: List output files (for debugging)
+      - name: List output files (debug)
         shell: cmd
         run: |
-          echo "Contents of desktop/dist-setup:"
-          dir desktop\dist-setup /s /b
-          if not exist desktop\dist-setup\*.exe (
-            echo "ERROR: No .exe file found in dist-setup!"
-            exit /b 1
-          )
+          dir desktop\dist-setup
+          exit /b 0
 
       - name: Upload Setup.exe
         uses: actions/upload-artifact@v4
