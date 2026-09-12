@@ -43,7 +43,7 @@
       "createStartMenuShortcut": true,
       "shortcutName": "چاپینو",
       "artifactName": "Chapino-Setup-${version}.exe",
-      "installerLanguages": ["fa_IR", "en_US"]
+      "installerLanguages": ["en-US"],
     }
   }
 }
