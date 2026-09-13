@@ -113,8 +113,9 @@ export function InvoicePaper({
 
       <footer className="invoice-footer">
         <div>
-          {settings.cardNumber ? <p><b>شماره کارت:</b> {toPersianDigits(settings.cardNumber)}</p> : null}
+          {settings.cardNumber ? <p className="invoice-card-line"><b>شماره کارت:</b> <span className="invoice-card-number">{formatCardNumber(settings.cardNumber)}</span>{settings.cardOwner ? ` (به نام ${settings.cardOwner})` : ""}</p> : null}
           <p>{settings.footer}</p>
+          {settings.manager ? <p className="invoice-manager"><b>مدیریت:</b> {settings.manager}</p> : null}
         </div>
         <span>صفحه ۱ از ۱</span>
       </footer>

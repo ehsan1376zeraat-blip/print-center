@@ -4,7 +4,7 @@ import { formatCardNumber, formatJalali, formatNumber, numberToPersianWords, toP
 import type { BusinessSettings, CustomerDto, LedgerDto } from "@/lib/types";
 import { Building2, CalendarRange, MapPin, Phone, UserRound } from "lucide-react";
 
-export type StatementRow = LedgerDto & { running: number };
+export type StatementRow = LedgerDto & { running: number; invoiceNumber?: string; isItem?: boolean };
 
 export function StatementPaper({
   customer,
@@ -62,25 +62,27 @@ export function StatementPaper({
           <tr>
             <th>ردیف</th>
             <th>شرح</th>
-            <th>بدهکار</th>
-            <th>بستانکار</th>
+            <th>تاریخ</th>
+            <th>بدهکار (تومان)</th>
+            <th>بستانکار (تومان)</th>
           </tr>
         </thead>
         <tbody>
           {entries.length ? (
             entries.map((entry, index) => (
-              <tr key={entry.id}>
+              <tr key={`${entry.id}-${index}`} className={entry.isItem ? "statement-item-row" : entry.credit > 0 && entry.debit === 0 ? "payment-line" : ""}>
                 <td>{toPersianDigits(index + 1)}</td>
                 <td>
-                  <span className="statement-desc">{entry.description}</span>
-                  <small className="statement-row-date">{formatJalali(entry.jalaliDate)}</small>
+                  {entry.invoiceNumber ? <span className="invoice-ref-tag">فاکتور {toPersianDigits(entry.invoiceNumber)}</span> : null}
+                  {entry.description}
                 </td>
+                <td>{formatJalali(entry.jalaliDate)}</td>
                 <td>{entry.debit ? formatNumber(entry.debit) : "—"}</td>
                 <td>{entry.credit ? formatNumber(entry.credit) : "—"}</td>
               </tr>
             ))
           ) : (
-            <tr><td colSpan={4} className="statement-empty">در این بازه تراکنشی ثبت نشده است</td></tr>
+            <tr><td colSpan={5} className="statement-empty">در این بازه تراکنشی ثبت نشده است</td></tr>
           )}
         </tbody>
       </table>
@@ -102,8 +104,9 @@ export function StatementPaper({
 
       <footer className="invoice-footer">
         <div>
-          {settings.cardNumber ? <p><b>شماره کارت:</b> {toPersianDigits(settings.cardNumber)}</p> : null}
+          {settings.cardNumber ? <p className="invoice-card-line"><b>شماره کارت:</b> <span className="invoice-card-number">{formatCardNumber(settings.cardNumber)}</span>{settings.cardOwner ? ` (به نام ${settings.cardOwner})` : ""}</p> : null}
           <p>{settings.footer}</p>
+          {settings.manager ? <p className="invoice-manager"><b>مدیریت:</b> {settings.manager}</p> : null}
         </div>
         <span>صفحه ۱ از ۱</span>
       </footer>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/confirm";
 import { Amount, AmountInput, BalanceBadge, EmptyState, Field, Modal, PageHeader, SearchBox } from "@/components/ui";
 import { formatJalali, formatNumber, formatToman, initials, sanitizeJalaliDate, toPersianDigits } from "@/lib/format";
 import type { AppData, CustomerDto, LedgerDto } from "@/lib/types";
@@ -17,6 +18,7 @@ export function Customers({ data, mutate }: { data: AppData; mutate: Mutate }) {
   const [form, setForm] = useState({ name: "", phone: "", note: "" });
   const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ jalaliDate: "", description: "", debit: 0, credit: 0 });
+  const { confirm, confirmDialog } = useConfirm();
 
   const filtered = data.customers.filter((customer) => `${customer.name} ${customer.phone}`.includes(query.trim()));
   const liveStatementCustomer = statementCustomer ? data.customers.find((customer) => customer.id === statementCustomer.id) ?? statementCustomer : null;
@@ -52,7 +54,8 @@ export function Customers({ data, mutate }: { data: AppData; mutate: Mutate }) {
   }
 
   async function remove(customer: CustomerDto) {
-    if (!window.confirm(`مشتری «${customer.name}» حذف شود؟`)) return;
+    const ok = await confirm({ title: "حذف مشتری", message: `مشتری «${customer.name}» حذف شود؟ این کار قابل بازگشت نیست.`, confirmLabel: "حذف مشتری" });
+    if (!ok) return;
     await mutate({ action: "customer.delete", id: customer.id }, "مشتری حذف شد");
   }
 
@@ -68,7 +71,8 @@ export function Customers({ data, mutate }: { data: AppData; mutate: Mutate }) {
   }
 
   async function removeEntry(entry: StatementEntry) {
-    if (!window.confirm("این تراکنش حذف شود؟")) return;
+    const ok = await confirm({ title: "حذف تراکنش", message: "این تراکنش حذف شود؟" });
+    if (!ok) return;
     await mutate({ action: "ledger.delete", id: entry.id }, "تراکنش حذف شد");
   }
 
@@ -175,6 +179,8 @@ export function Customers({ data, mutate }: { data: AppData; mutate: Mutate }) {
           </div>
         ) : null}
       </Modal>
+
+      {confirmDialog}
     </>
   );
 }

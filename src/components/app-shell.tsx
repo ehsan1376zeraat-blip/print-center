@@ -120,7 +120,7 @@ export function AppShell() {
     if (active === "invoice") return <InvoiceEditor data={data} mutate={mutate} />;
     if (active === "customers") return <Customers data={data} mutate={mutate} />;
     if (active === "ledger") return <Ledger data={data} mutate={mutate} />;
-    if (active === "debtors") return <Debtors data={data} />;
+    if (active === "debtors") return <Debtors data={data} mutate={mutate} />;
     if (active === "settings") return <Settings data={data} mutate={mutate} />;
     return <Dashboard data={data} onNavigate={navigate} />;
   };

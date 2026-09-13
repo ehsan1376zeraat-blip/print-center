@@ -1,9 +1,11 @@
 "use client";
 
-import { AmountInput, EmptyState, Field, PageHeader } from "@/components/ui";
+import { useConfirm } from "@/components/confirm";
+import { InvoicePaper } from "@/components/invoice-paper";
+import { AmountInput, EmptyState, Field, Modal, PageHeader } from "@/components/ui";
 import { formatJalali, formatNumber, formatToman, sanitizeJalaliDate, toPersianDigits } from "@/lib/format";
-import type { AppData } from "@/lib/types";
-import { ArrowDownLeft, ArrowUpRight, BookOpen, CalendarRange, Filter, Landmark, Plus, ReceiptText, Trash2 } from "lucide-react";
+import type { AppData, InvoiceDto, LedgerDto } from "@/lib/types";
+import { ArrowDownLeft, ArrowUpRight, BookOpen, CalendarRange, Check, Edit3, Eye, Filter, Landmark, Plus, Printer, ReceiptText, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type Mutate = (payload: Record<string, unknown>, successMessage?: string) => Promise<Record<string, unknown>>;
@@ -11,6 +13,10 @@ type Mutate = (payload: Record<string, unknown>, successMessage?: string) => Pro
 export function Ledger({ data, mutate }: { data: AppData; mutate: Mutate }) {
   const [form, setForm] = useState({ customerId: data.customers[0]?.id ?? 0, kind: "debit", amount: 0, jalaliDate: data.today, description: "" });
   const [filter, setFilter] = useState({ customerId: 0, from: "", to: "" });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState({ jalaliDate: "", description: "", debit: 0, credit: 0 });
+  const [preview, setPreview] = useState<InvoiceDto | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   const entries = useMemo(() => data.ledger.filter((entry) => {
     if (filter.customerId && entry.customerId !== filter.customerId) return false;
@@ -20,15 +26,44 @@ export function Ledger({ data, mutate }: { data: AppData; mutate: Mutate }) {
   }), [data.ledger, filter]);
   const debitTotal = entries.reduce((sum, entry) => sum + entry.debit, 0);
   const creditTotal = entries.reduce((sum, entry) => sum + entry.credit, 0);
+  const previewCustomer = preview ? data.customers.find((customer) => customer.id === preview.customerId) : undefined;
 
   async function submit() {
     await mutate({ action: "ledger.create", ...form }, "تراکنش در دفتر حساب ثبت شد");
     setForm((current) => ({ ...current, amount: 0, description: "" }));
   }
 
-  async function remove(id: number) {
-    if (!window.confirm("این تراکنش دستی حذف شود؟")) return;
-    await mutate({ action: "ledger.delete", id }, "تراکنش حذف شد");
+  function startEdit(entry: LedgerDto) {
+    setEditingId(entry.id);
+    setEditForm({ jalaliDate: entry.jalaliDate, description: entry.description, debit: entry.debit, credit: entry.credit });
+  }
+
+  async function saveEdit() {
+    if (!editingId) return;
+    await mutate({ action: "ledger.update", id: editingId, ...editForm }, "تراکنش ویرایش شد");
+    setEditingId(null);
+  }
+
+  async function removeEntry(entry: LedgerDto) {
+    if (entry.automatic && entry.refInvoiceId) {
+      const invoice = data.invoices.find((item) => item.id === entry.refInvoiceId);
+      const ok = await confirm({
+        title: "حذف فاکتور",
+        message: `فاکتور «${invoice ? toPersianDigits(invoice.number) : ""}» به‌طور کامل حذف شود؟ اقلام فاکتور و تراکنش دفتر حساب هم پاک می‌شوند.`,
+        confirmLabel: "حذف فاکتور",
+      });
+      if (!ok) return;
+      await mutate({ action: "invoice.delete", id: entry.refInvoiceId }, "فاکتور حذف شد");
+    } else {
+      const ok = await confirm({ title: "حذف تراکنش", message: "این تراکنش دستی حذف شود؟" });
+      if (!ok) return;
+      await mutate({ action: "ledger.delete", id: entry.id }, "تراکنش حذف شد");
+    }
+  }
+
+  function openPreview(entry: LedgerDto) {
+    const invoice = data.invoices.find((item) => item.id === entry.refInvoiceId);
+    if (invoice) setPreview(invoice);
   }
 
   return (
@@ -65,20 +100,53 @@ export function Ledger({ data, mutate }: { data: AppData; mutate: Mutate }) {
         </div>
 
         {entries.length ? (
-          <div className="table-wrap"><table className="data-table"><thead><tr><th>تاریخ</th><th>مشتری</th><th>شرح تراکنش</th><th>بدهکار (تومان)</th><th>بستانکار (تومان)</th><th>منبع</th><th /></tr></thead><tbody>
-            {entries.map((entry) => (
+          <div className="table-wrap"><table className="data-table ledger-table"><thead><tr><th>تاریخ</th><th>مشتری</th><th>شرح تراکنش</th><th>بدهکار (تومان)</th><th>بستانکار (تومان)</th><th>منبع</th><th>عملیات</th></tr></thead><tbody>
+            {entries.map((entry) => editingId === entry.id ? (
+              <tr className="editing-row" key={entry.id}>
+                <td className="edit-cell date-cell"><input value={toPersianDigits(editForm.jalaliDate)} onChange={(event) => setEditForm({ ...editForm, jalaliDate: sanitizeJalaliDate(event.target.value) })} inputMode="numeric" /></td>
+                <td><b>{entry.customerName}</b></td>
+                <td className="edit-cell desc-cell"><input value={editForm.description} onChange={(event) => setEditForm({ ...editForm, description: event.target.value })} /></td>
+                <td className="edit-cell"><AmountInput value={editForm.debit} onChange={(value) => setEditForm({ ...editForm, debit: value })} disabled={entry.automatic} /></td>
+                <td className="edit-cell"><AmountInput value={editForm.credit} onChange={(value) => setEditForm({ ...editForm, credit: value })} disabled={entry.automatic} /></td>
+                <td><small className="edit-hint">{entry.automatic ? "فاکتور" : "دستی"}</small></td>
+                <td>
+                  <div className="row-actions">
+                    <button className="table-action green" title="ذخیره" onClick={saveEdit} disabled={!editForm.description.trim()}><Check size={16} /></button>
+                    <button className="table-action" title="انصراف" onClick={() => setEditingId(null)}><X size={16} /></button>
+                  </div>
+                </td>
+              </tr>
+            ) : (
               <tr key={entry.id}>
                 <td>{formatJalali(entry.jalaliDate)}</td><td><b>{entry.customerName}</b></td>
                 <td>{entry.description}</td>
                 <td>{entry.debit ? <span className="transaction-amount debit"><ArrowUpRight size={14} />{formatToman(entry.debit)}</span> : "—"}</td>
                 <td>{entry.credit ? <span className="transaction-amount credit"><ArrowDownLeft size={14} />{formatToman(entry.credit)}</span> : "—"}</td>
                 <td>{entry.automatic ? <span className="source-chip"><ReceiptText size={13} /> فاکتور</span> : <span className="source-chip manual"><BookOpen size={13} /> دستی</span>}</td>
-                <td>{!entry.automatic ? <button className="table-action danger" onClick={() => remove(entry.id)} title="حذف"><Trash2 size={16} /></button> : null}</td>
+                <td>
+                  <div className="row-actions">
+                    <button className="table-action" title="ویرایش" onClick={() => startEdit(entry)}><Edit3 size={15} /></button>
+                    {entry.automatic && entry.refInvoiceId ? <button className="table-action green" title="مشاهده فاکتور" onClick={() => openPreview(entry)}><Eye size={16} /></button> : null}
+                    <button className="table-action danger" title={entry.automatic ? "حذف فاکتور" : "حذف تراکنش"} onClick={() => removeEntry(entry)}><Trash2 size={15} /></button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody></table></div>
         ) : <EmptyState icon={<BookOpen size={28} />} title="تراکنشی در این بازه نیست" text="یک تراکنش دستی ثبت کنید یا فیلترها را تغییر دهید." />}
+        {editingId ? <p className="auto-edit-note"><ReceiptText size={14} /> در تراکنش‌های فاکتور فقط تاریخ و شرح قابل ویرایش است؛ برای تغییر مبلغ، فاکتور را حذف و دوباره صادر کنید.</p> : null}
       </section>
+
+      <Modal open={Boolean(preview)} onClose={() => setPreview(null)} title={`پیش‌نمایش فاکتور ${preview ? toPersianDigits(preview.number) : ""}`} subtitle="نمای چاپی دقیق روی کاغذ A4" size="xl">
+        {preview ? (
+          <div className="preview-stage">
+            <div className="preview-toolbar"><button className="button button-primary" onClick={() => window.print()}><Printer size={17} /> چاپ / خروجی PDF</button></div>
+            <InvoicePaper number={preview.number} date={preview.jalaliDate} customer={previewCustomer} items={preview.items} previousBalance={preview.previousBalance} note={preview.note} settings={data.settings} />
+          </div>
+        ) : null}
+      </Modal>
+
+      {confirmDialog}
     </>
   );
 }

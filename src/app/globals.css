@@ -171,6 +171,8 @@ kbd { direction: ltr; color: var(--muted); border: 1px solid var(--line); backgr
 .button-ghost { color: var(--muted); border-color: var(--line); background: var(--card); }
 .button-ghost:hover:not(:disabled) { color: var(--primary); border-color: var(--primary-soft); }
 .button-payment { color: #137d68; background: #e8f8f5; border-color: #bdebe2; }
+.button-danger { color: white; background: var(--danger); box-shadow: 0 3px 10px rgba(231, 76, 60, .28); }
+.button-danger:hover:not(:disabled) { background: #cf4436; }
 .button-large { min-height: 45px; padding: 0 20px; font-size: 13px; }
 .button-small { min-height: 34px; font-size: 10.5px; padding: 0 11px; }
 .button-full { width: 100%; min-height: 47px; }
@@ -441,12 +443,119 @@ kbd { direction: ltr; color: var(--muted); border: 1px solid var(--line); backgr
   .toast { right: 14px; left: 14px; bottom: 14px; min-width: 0; }
 }
 
+/* دیالوگ تأیید داخلی (جایگزین window.confirm) */
+.confirm-body { display: flex; flex-direction: column; align-items: center; padding: 26px 22px 22px; text-align: center; }
+.confirm-icon { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 18px; color: var(--warning); background: #fff4e8; margin-bottom: 14px; }
+.confirm-icon.danger { color: var(--danger); background: var(--danger-soft); }
+.confirm-message { margin: 0 0 20px; max-width: 360px; color: var(--ink); font-size: 14px; line-height: 2; }
+.confirm-actions { display: flex; gap: 10px; width: 100%; justify-content: center; }
+.confirm-actions .button { min-width: 120px; }
+
+/* ===== اصلاحیه نهایی: درشت‌تر شدن همه اعداد (+۴) و شماره کارت درشت ===== */
+.data-table th { font-size: 12.5px; height: 48px; }
+.data-table td { font-size: 14px; height: 68px; }
+.compact-table th { height: 44px; }
+.compact-table td { height: 58px; }
+.amount { font-size: 15px; }
+.invoice-number { font-size: 15px; }
+.customer-cell b { font-size: 13px; }
+.customer-cell small { font-size: 10.5px; max-width: 170px; }
+.transaction-amount { font-size: 15px; }
+.large-debt { font-size: 15px; }
+.badge { min-width: 56px; height: 26px; font-size: 11px; padding: 0 10px; }
+.stat-copy strong { font-size: clamp(18px, 1.6vw, 22px); }
+.stat-copy > span { font-size: 12px; }
+.stat-copy small { font-size: 10.5px; }
+.debtor-stats strong { font-size: 18px; }
+.debtor-stats small { font-size: 11px; }
+.statement-summary b { font-size: 16px; }
+.statement-summary span { font-size: 10px; }
+.statement-quick b { font-size: 17px; }
+.statement-quick span { font-size: 10.5px; }
+.invoice-code { min-width: 170px; }
+.invoice-code strong { font-size: 20px; }
+.invoice-code span { font-size: 10px; }
+.editor-summary-lines > div:not(.editor-final) { font-size: 13px; }
+.editor-final span { font-size: 12px; }
+.editor-final strong { font-size: 20px; }
+.words-box span { font-size: 10.5px; }
+.words-box p { font-size: 13px; }
+.ledger-totals { font-size: 12px; }
+.invoice-edit-table th { font-size: 11px; height: 44px; }
+.invoice-edit-table td { font-size: 12.5px; height: 62px; }
+.invoice-edit-table input { font-size: 13.5px; min-height: 40px; }
+.row-counter { font-size: 11.5px; height: 30px; }
+.rank { width: 29px; height: 29px; font-size: 12px; }
+.debt-share span { font-size: 11px; }
+.filter-bar select, .filter-bar input { font-size: 12px; }
+.filter-label { font-size: 11px; }
+.date-filter input { font-size: 12px; }
+.date-filter { font-size: 11px; }
+.edit-cell input { font-size: 13px; min-height: 38px; }
+.edit-hint { font-size: 10px; }
+.auto-edit-note { font-size: 11px; }
+.list-count { font-size: 12px; }
+input, select, textarea { font-size: 14.5px; }
+
+/* فاکتور و صورت‌حساب چاپی: همه اعداد درشت‌تر */
+.invoice-paper { padding-bottom: 125px; }
+.invoice-brand h2 { font-size: 22px; }
+.invoice-brand p { font-size: 13px; }
+.invoice-meta { min-width: 175px; }
+.invoice-meta span { font-size: 12px; }
+.invoice-meta strong { font-size: 21px; }
+.invoice-meta small { font-size: 12px; }
+.invoice-customer small { font-size: 11px; }
+.invoice-customer strong { font-size: 15px; }
+.invoice-customer p { font-size: 12px; }
+.invoice-items-table th { height: 50px; font-size: 13px; }
+.invoice-items-table td { height: 48px; font-size: 13.5px; }
+.payment-tag { font-size: 10px; }
+.invoice-note { font-size: 12px; }
+.summary-words small { font-size: 11px; }
+.summary-words p { font-size: 13.5px; }
+.summary-numbers { padding: 12px 16px; }
+.summary-numbers > div { min-height: 36px; font-size: 12px; }
+.summary-numbers b { font-size: 14px; }
+.summary-numbers .summary-final.is-debt b, .summary-numbers .summary-final.is-credit b { font-size: 17px; }
+.invoice-footer { min-height: 92px; padding: 13px 15px 26px; }
+.invoice-footer p { font-size: 12px; }
+.invoice-footer > span { font-size: 10px; }
+.invoice-card-line { font-size: 13px !important; }
+.invoice-card-number { display: inline-block; direction: ltr; font-size: 21px; font-weight: 800; letter-spacing: 1px; color: #1c2833; }
+.invoice-manager { font-size: 13px !important; }
+.invoice-ref-tag { display: inline-block; margin-left: 6px; padding: 3px 8px; border-radius: 8px; color: var(--paper-primary); background: color-mix(in srgb, var(--paper-primary), white 86%); font-size: 10px; font-weight: 700; }
+.statement-item-row td:nth-child(2) { font-size: 12.5px; }
+.statement-empty { font-size: 13px; }
+.statement-range { font-size: 12px; }
+
+/* گزارش کلی بدهکاران چاپی */
+.debtor-report-paper { padding-bottom: 120px; }
+.debtor-report-paper header small { font-size: 12px; }
+.debtor-report-paper h2 { font-size: 22px; }
+.debtor-report-paper header p { font-size: 13px; }
+.report-date span { font-size: 11px; }
+.report-date b { font-size: 15px; }
+.report-summary span { font-size: 11px; }
+.report-summary strong { font-size: 14px; }
+.debtor-report-paper th { height: 48px; font-size: 12.5px; }
+.debtor-report-paper td { height: 48px; font-size: 12.5px; }
+.debtor-report-paper footer { height: auto; min-height: 88px; padding: 12px 12px 26px; }
+.debtor-report-paper footer > div p { font-size: 12px; }
+
+/* مدیریت تراکنش‌ها داخل مودال صورت‌حساب بدهکار */
+.statement-manage { padding: 16px 18px 4px; background: var(--card); }
+.statement-manage-head h3 { margin: 0; font-size: 13px; }
+.statement-manage-head p { margin: 3px 0 12px; color: var(--muted); font-size: 10.5px; }
+.statement-manage .table-wrap { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.ledger-table td:last-child { min-width: 118px; }
+
 @media print {
   @page { size: A4 portrait; margin: 0; }
   html, body { width: 210mm; min-height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; }
   body * { visibility: hidden !important; }
   .modal-backdrop .invoice-paper, .modal-backdrop .invoice-paper *, .modal-backdrop .debtor-report-paper, .modal-backdrop .debtor-report-paper * { visibility: visible !important; }
-  .modal-backdrop .invoice-paper, .modal-backdrop .debtor-report-paper { position: absolute !important; top: 0 !important; right: 0 !important; left: auto !important; width: 210mm !important; min-height: 297mm !important; margin: 0 !important; padding: 12mm 12mm 22mm !important; box-shadow: none !important; transform: none !important; print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
+  .modal-backdrop .invoice-paper, .modal-backdrop .debtor-report-paper { position: absolute !important; top: 0 !important; right: 0 !important; left: auto !important; width: 210mm !important; min-height: 297mm !important; margin: 0 !important; padding: 12mm 12mm 30mm !important; box-shadow: none !important; transform: none !important; print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
   .modal-backdrop .invoice-topline, .modal-backdrop .report-topline { height: 6mm !important; }
   .modal-backdrop .invoice-footer, .modal-backdrop .debtor-report-paper footer { right: 12mm !important; left: 12mm !important; bottom: 7mm !important; }
 }

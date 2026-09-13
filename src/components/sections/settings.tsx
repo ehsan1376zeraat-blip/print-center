@@ -19,6 +19,7 @@ const palettes = [
 export function Settings({ data, mutate }: { data: AppData; mutate: Mutate }) {
   const [form, setForm] = useState<BusinessSettings>(data.settings);
   const [saving, setSaving] = useState(false);
+  const [logoError, setLogoError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setForm(data.settings), [data.settings]);
@@ -30,9 +31,10 @@ export function Settings({ data, mutate }: { data: AppData; mutate: Mutate }) {
   function chooseLogo(file?: File) {
     if (!file) return;
     if (file.size > 1_500_000) {
-      window.alert("حجم لوگو بهتر است کمتر از ۱.۵ مگابایت باشد.");
+      setLogoError("حجم لوگو باید کمتر از ۱.۵ مگابایت باشد.");
       return;
     }
+    setLogoError("");
     const reader = new FileReader();
     reader.onload = () => patch({ logo: String(reader.result ?? "") });
     reader.readAsDataURL(file);
@@ -63,7 +65,7 @@ export function Settings({ data, mutate }: { data: AppData; mutate: Mutate }) {
               <div className="logo-preview">
                 {form.logo ? <>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={form.logo} alt="لوگو" /><button onClick={() => patch({ logo: "" })} title="حذف لوگو"><X size={14} /></button></> : <Building2 size={28} />}
               </div>
-              <div><b>لوگوی کسب‌وکار</b><p>فرمت PNG یا JPG، حداکثر ۱.۵ مگابایت</p><button className="button button-secondary button-small" onClick={() => fileRef.current?.click()}><ImagePlus size={16} /> انتخاب لوگو</button><input ref={fileRef} type="file" accept="image/png,image/jpeg" hidden onChange={(event) => chooseLogo(event.target.files?.[0])} /></div>
+              <div><b>لوگوی کسب‌وکار</b><p>{logoError || "فرمت PNG یا JPG، حداکثر ۱.۵ مگابایت"}</p><button className="button button-secondary button-small" onClick={() => fileRef.current?.click()}><ImagePlus size={16} /> انتخاب لوگو</button><input ref={fileRef} type="file" accept="image/png,image/jpeg" hidden onChange={(event) => chooseLogo(event.target.files?.[0])} /></div>
             </div>
             <div className="form-grid settings-grid">
               <Field label="نام کسب‌وکار"><input value={form.businessName} onChange={(event) => patch({ businessName: event.target.value })} placeholder="نام مرکز کپی و چاپ" /></Field>
