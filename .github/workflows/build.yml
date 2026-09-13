@@ -43,13 +43,23 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
-      - name: Show desktop package.json (debug)
-        shell: cmd
-        run: type desktop\package.json
-
       - name: Install desktop dependencies
         working-directory: desktop
         run: npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Fix installer language (auto-patch)
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $file = "package.json"
+          $json = Get-Content $file -Raw | ConvertFrom-Json
+          if ($json.build -and $json.build.nsis -and $json.build.nsis.installerLanguages) {
+            $json.build.nsis.installerLanguages = @("en-US")
+            $json | ConvertTo-Json -Depth 10 | Set-Content $file -Encoding UTF8
+            Write-Host "Auto-patched: installerLanguages set to en-US"
+          } else {
+            Write-Host "No patch needed"
+          }
 
       - name: Build Setup.exe with electron-builder
         working-directory: desktop
